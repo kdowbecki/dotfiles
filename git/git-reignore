@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+#
+# Removes all currently ignored files from the repository, freeing the disk space in the repo
+# Based on http://stevelorek.com/how-to-shrink-a-git-repository.html and various posts on Stack Overflow
+#
+
+yell() { echo "$0: $*" >&2; }
+die() { yell "$*"; exit -42; }
+try() { "$@" || die "Failed to: $*"; }
+
+if ! [[ -d .git && "$( git rev-parse --is-inside-work-tree 2>/dev/null )" = "true" ]]; then
+  printf "Reignore can only be run inside git repository.\n"
+  exit -1
+fi
+
+# Find files that are currently ignored but are still tracked by repo
+printf "Checking files"
+unique_files=( $( git rev-list --all --objects | cut -d ' ' -f 2 -s | sort | uniq ) )
+if [[ ${#unique_files[@]} -eq 0 ]]; then
+  printf ", no files in repo, finished.\n"
+  exit 0
+fi
+to_remove=( $( git check-ignore --no-index -- ${unique_files[*]} ) )
+if [[ ${#to_remove[@]} -eq 0 ]]; then
+  printf ", nothing to reignore, finished.\n"
+  exit 0
+else
+  printf ", done.\n"
+fi
+
+# Track all remote branches to ensure that we really cleanup entire repo
+remote_branches=( $( git branch -r | grep -v HEAD ) )
+if [[ ${#remote_branches[@]} -gt 0 ]]; then
+  # Handle possible colon on local branch being ahead e.g. [origin/master: ahead 1]
+  local_branches=( $( git branch -vv | cut -d '[' -f 2 | cut -d ']' -f 1 | cut -d ':' -f 1 ) )
+  i=1
+  for remote_branch in ${remote_branches[@]}; do
+    printf "\rTracking remote branches (%d/%d)" $i ${#remote_branches[@]}
+    if [[ " ${local_branches[@]} " != *" ${remote_branch} "* ]]; then
+      # Only track untracked remotes
+      try git branch --track ${remote_branch##*/} "${remote_branch}" 1>/dev/null
+    fi
+    ((i++))
+  done
+  printf ", done.\n"
+fi
+
+# Use filter-branch to rewrite history
+i=1
+for file in ${to_remove[@]}; do
+  printf "Removing files (%d/%d)\n" $i ${#to_remove[@]}
+  try git filter-branch --index-filter "git rm -r -q --cached --ignore-unmatch -- '${file}'" \
+    --prune-empty --force --tag-name-filter cat -- --all
+  ((i++))
+done
+
+# filter-branch doesn't cleanup local repo, we have to do it manually
+printf "Reclaiming disk space"
+try rm -rf ".git/refs/original/"
+try git reflog expire --expire=now --all 1>/dev/null
+try git gc -q --aggressive --prune=now
+printf ", done.\n"
+
+# Summary
+printf "Reignored files:\n"
+for file in ${to_remove[@]}; do
+	printf "  %s\n" "$file"
+done
+printf "You can now push changes with:\n"
+printf "  git push origin --force --all\n"
+printf "  git push origin --force --tags\n"
