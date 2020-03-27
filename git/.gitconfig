@@ -1,8 +1,16 @@
 [user]
 	name = Karol Dowbecki
+	signingkey = A8E0A402897E456D 
 [core]
 	autocrlf = false
 [alias]
 	pff = pull --ff
 	l1 = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
 	l2 = log --graph --oneline --decorate --all
+[commit]
+	gpgsign = true
+[pull]
+        rebase = true
+[rebase]
+        autoStash = true
+
