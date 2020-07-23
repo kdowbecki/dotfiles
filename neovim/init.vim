@@ -1,56 +1,38 @@
-" ---------------------------------------------------------------------------
-"  NeoVIM config
-" ---------------------------------------------------------------------------
+" -----------------------------------------------
+" Colorscheme
+" -----------------------------------------------
 
-let g:loaded_python_provider = 1                                        " Disable Python 2 support
-let g:python3_host_prog = expand('~/.pyenv/versions/neovim/bin/python') " Path of the python binary
+call plug#begin()
+Plug 'rakr/vim-one'             " One colorscheme
+call plug#end()
 
+"Credit joshdick
+"Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
+"If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
+"(see < http://sunaku.github.io/tmux-24bit-color.html#usage > for more information.)
+if (empty($TMUX))
+  if (has("nvim"))
+  "For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+  endif
+  "For Neovim > 0.1.5 and Vim > patch 7.4.1799 < https://github.com/vim/vim/commit/61be73bb0f965a895bfb064ea3e55476ac175162 >
+  "Based on Vim patch 7.4.1770 (`guicolors` option) < https://github.com/vim/vim/commit/8a633e3427b47286869aa4b96f2bfc1fe65b25cd >
+  " < https://github.com/neovim/neovim/wiki/Following-HEAD#20160511 >
+  if (has("termguicolors"))
+    set termguicolors
+  endif
+endif
 
-" ---------------------------------------------------------------------------
-"  Plugins
-" ---------------------------------------------------------------------------
+syntax on                       " Activate syntax
+set background=dark             " Use One dark version
+colorscheme one                 " Use One colorscheme
 
-call plug#begin('~/.config/nvim/plugged')                     " Start list of plugin
-
-" UI
-Plug 'sonph/onehalf', {'rtp': 'vim/'}                         " An awesome dark theme
-Plug 'vim-airline/vim-airline'                                " Adds more info to the bottom bar
-
-" Utilities
-Plug 'airblade/vim-gitgutter'                                 " Show Git info in the gutter
-Plug 'editorconfig/editorconfig-vim'                          " Parse .editorconfig files
-Plug 'jiangmiao/auto-pairs'                                   " Add/Delete pairs together
-Plug 'junegunn/fzf'                                           " Fuzzy finder
-Plug 'majutsushi/tagbar'                                      " Show list of tags in the file
-Plug 'scrooloose/nerdtree'                                    " Filesystem tree in the sidebar
-Plug 'scrooloose/nerdcommenter'                               " Comment blocks of code
-Plug 'tpope/vim-sensible'                                     " Sensible defaults
-Plug 'tpope/vim-fugitive'                                     " Git plugin
-Plug 'wellle/targets.vim'                                     " Add additional text objects
-
-" Languages
-" Plug 'hashivim/vim-terraform'                                 " Terraform integration
-" Plug 'sheerun/vim-polyglot'                                   " Syntax support for multiple languages
-" Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}   " Auto Completion
-" Plug 'zchee/deoplete-go', {'do': 'make'}                      " Auto Completion: Go
-" Plug 'zchee/deoplete-jedi'                                    " Auto Completion: Python
-" Plug 'fatih/vim-go', {'do': ':GoUpdateBinaries'}              " Go
-
-call plug#end()                                               " Finished!
-
-
-" ---------------------------------------------------------------------------
-"  General configuration
-" ---------------------------------------------------------------------------
-
+" -----------------------------------------------
 " General
+" -----------------------------------------------
+
 let mapleader=","               " Lead with ,
 set mouse=a                     " Let's activate the mouse
-
-" Theme
-set termguicolors               " Colors!
-syntax on                       " Activate syntax
-colorscheme onehalfdark         " Use the cool dark theme
 
 " Format settings
 set nowrap                      " No wrap lines
@@ -63,7 +45,6 @@ set autoindent                  " Always set autoindenting on
 set smartindent                 " Smart indent
 set copyindent                  " Copy the previous indentation
 set number                      " Always show line number
-"set relativenumber             " But be relative ones
 set shiftwidth=4                " Four spaces on indenting
 set shiftround                  " Use multiple of swidth when indenting with <>
 set showmatch                   " Set show matching parenthesis
@@ -105,65 +86,3 @@ set wildmode=list:longest,full
 set wildchar=<TAB>
 set wildignore=*.swp,*.bak,*.pyc,*.pyo,*.class,*.o
 
-
-" ---------------------------------------------------------------------------
-"  Shorcuts
-" ---------------------------------------------------------------------------
-
-" ,w -> Strip whitespaces
-nnoremap <Leader>ws :%s/ \+$//gc<CR>
-
-" ,se -> Spellcheck in English
-nnoremap <Leader>se :setlocal spell spelllang=en<CR>
-
-
-" ---------------------------------------------------------------------------
-" Plugin configuration
-" ---------------------------------------------------------------------------
-
-" Airline
-let g:airline_powerline_fonts = 1
-
-" FZF
-nnoremap <C-p> :FZF<CR>
-let g:fzf_action = {
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-h': 'split',
-  \ 'ctrl-v': 'vsplit' }
-
-" NERDTree
-nnoremap <Leader>tr :NERDTreeToggle<CR>
-let g:NERDTreeCascadeSingleChildDir=1
-let g:NERDTreeCascadeOpenSingleChildDir=1
-let g:NERDTreeMapOpenSplit='h'
-let g:NERDTreeMapOpenVSplit='v'
-
-" Tagbar
-nnoremap <Leader>ta :TagbarToggle<CR>
-
-" Terraform
-let g:terraform_fmt_on_save=1
-
-" Neoplete
-let g:deoplete#enable_at_startup=1
-
-" vim-go
-let g:go_auto_sameids = 1
-let g:go_auto_type_info = 1
-let g:go_metalinter_autosave = 0
-
-" ---------------------------------------------------------------------------
-" Format configuration
-" ---------------------------------------------------------------------------
-
-" Turn on spell checking for commit messages and automatic wrapping
-augroup filetype_gitcommit
-  autocmd!
-  autocmd Filetype gitcommit setlocal spell textwidth=72
-augroup END
-
-" Turn on spell checking for Markdown files
-augroup filetype_markdown
-  autocmd!
-  autocmd Filetype markdown setlocal spell
-augroup END

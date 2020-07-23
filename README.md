@@ -1,2 +1,4 @@
 # dotfiles
-Development environment configurations and scripts
+
+Development environment configurations and scripts.
+
