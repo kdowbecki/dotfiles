@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# You should use git-filter-branch instead (https://git-scm.com/docs/git-filter-branch).
+#
 # Removes all currently ignored files from the repository, freeing the disk space in the repo
 # Based on http://stevelorek.com/how-to-shrink-a-git-repository.html and various posts on Stack Overflow
 #
