@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+gdb --args /usr/bin/java $*
+
