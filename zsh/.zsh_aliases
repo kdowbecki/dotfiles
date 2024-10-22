@@ -1,0 +1,4 @@
+alias grep="grep -i -C5"
+alias vim="nvim"
+alias cdwork="cd $HOME/Workspace"
+alias mci="mvn clean install"
